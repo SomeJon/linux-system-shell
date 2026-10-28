@@ -1,21 +1,29 @@
-# POSIX-Compliant Custom Linux Shell
-A functional Command Line Interface (CLI) developed in C that implements core shell behaviors using low-level POSIX system calls. This project demonstrates a deep understanding of process synchronization, signal handling, and Inter-Process Communication (IPC).
+# Custom Linux Shell (C)
 
-## 🛠️ Technical Implementation
-* [cite_start]**Process Lifecycle Management:** Utilizes the `fork()`, `execvp()`, and `waitpid()` pattern to execute user commands in isolated child processes while maintaining a stable parent shell[cite: 126, 135].
-* **Advanced Command Piping:** Supports multi-stage command chaining (up to 2 levels) using `pipe()`. [cite_start]This enables data flow between processes (e.g., `cmd1 ! cmd2 ! cmd3`) by redirecting standard outputs to standard inputs[cite: 134, 136].
-* [cite_start]**I/O Redirection:** Implements custom input (`}`) and output (`{`) redirection using `dup2()` and low-level file descriptors (`STDIN_FILENO`, `STDOUT_FILENO`)[cite: 129, 137].
-* [cite_start]**Robust Error Handling:** Features a custom parser that validates command syntax before execution, preventing invalid redirections or improperly structured pipes[cite: 139, 140].
+A command-line shell written in C on top of low-level POSIX system calls. It runs user commands in child processes, chains commands with pipes, and redirects input and output.
 
-## 🛡️ Key Systems Knowledge
-* [cite_start]**IPC & File Descriptors:** Managed the complexity of closing unused pipe ends in both parent and child processes to avoid deadlocks and ensure proper EOF propagation[cite: 138].
-* [cite_start]**Signal Awareness:** Designed the shell to handle graceful termination via EOF (Ctrl+D), ensuring a clean exit from the main execution loop[cite: 127, 128].
-* [cite_start]**Pure System Programming:** Strictly avoided high-level library functions in favor of direct system calls, demonstrating a "from scratch" approach to systems software[cite: 144].
+Built as part of an Operating Systems course.
 
-## 📂 Project Structure
-- `os2.c`: The complete source code containing the tokenizer, command validator, and the multi-process execution engine.
+## Features
 
-## 🚀 How to Run
-1. Compile the shell using `gcc`:
-   ```bash
-   gcc os2.c -o myshell
+- **Process management**: each command runs in a child process using `fork()`, `execvp()` and `waitpid()`, while the parent shell keeps running.
+- **Pipes**: chains up to three commands (`cmd1 ! cmd2 ! cmd3`) with `pipe()`, connecting each command's output to the next one's input.
+- **I/O redirection**: input (`}`) and output (`{`) redirection with `dup2()` on `STDIN_FILENO` / `STDOUT_FILENO`.
+- **Syntax validation**: a custom parser checks each command line before running it, and rejects invalid redirections and malformed pipes.
+- **Clean exit**: the shell exits its main loop on EOF (Ctrl+D).
+
+## Implementation notes
+
+- Unused pipe ends are closed in both the parent and child processes, so that EOF propagates correctly and no process blocks waiting on an open pipe.
+- Process creation, piping and redirection are done with direct system calls rather than higher-level library wrappers such as `system()` or `popen()`.
+
+## Project structure
+
+- `os2.c`: the full source, including the tokenizer, the command validator and the execution engine.
+
+## Build and run
+
+```bash
+gcc os2.c -o myshell
+./myshell
+```
